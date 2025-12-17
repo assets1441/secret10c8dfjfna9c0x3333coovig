@@ -69,7 +69,7 @@ local State = {
 }
 local Connections = {}
 local ColorCache = {}
-local NotificationQueue = {}
+-- local NotificationQueue = {} -- Убрана очередь уведомлений
 
 -- Performance: Color caching
 local function GetCachedColor(r, g, b)
@@ -138,55 +138,28 @@ local function PushUndo(itemKey, oldValue)
     State.RedoStack = {} -- Clear redo on new action
 end
 
---// NOTIFICATION SYSTEM //--
-local NotificationFrame = nil
-local function CreateNotificationSystem()
-    NotificationFrame = Instance.new("Frame")
-    NotificationFrame.Name = "Notifications"
-    NotificationFrame.Size = UDim2.new(0, 250, 0, 300)
-    NotificationFrame.Position = UDim2.new(1, -260, 1, -310)
-    NotificationFrame.BackgroundTransparency = 1
-    NotificationFrame.Parent = ScreenGui
-    local layout = Instance.new("UIListLayout", NotificationFrame)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-    layout.Padding = UDim.new(0, 5)
-end
+--// NOTIFICATION SYSTEM (временно отключено или убрано) //--
+-- local NotificationFrame = nil
+-- local function CreateNotificationSystem()
+--     NotificationFrame = Instance.new("Frame")
+--     NotificationFrame.Name = "Notifications"
+--     NotificationFrame.Size = UDim2.new(0, 250, 0, 300)
+--     NotificationFrame.Position = UDim2.new(1, -260, 1, -310)
+--     NotificationFrame.BackgroundTransparency = 1
+--     NotificationFrame.Parent = ScreenGui
+--     local layout = Instance.new("UIListLayout", NotificationFrame)
+--     layout.SortOrder = Enum.SortOrder.LayoutOrder
+--     layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+--     layout.Padding = UDim.new(0, 5)
+-- end
 
 local function ShowNotification(text, duration)
-    if not NotificationFrame then return end
-    -- Use the setting from the core API
-    local settings = _G.BugFarmAPI.GetConfig()
-    if settings.ShowNotifications == false then return end
-    local notif = Instance.new("Frame")
-    notif.Size = UDim2.new(1, 0, 0, 0)
-    notif.BackgroundColor3 = State.CurrentTheme.Main
-    notif.BorderSizePixel = 0
-    notif.Parent = NotificationFrame
-    local stroke = Instance.new("UIStroke", notif)
-    stroke.Color = State.CurrentTheme.Accent
-    stroke.Thickness = 1
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 1, 0)
-    label.Position = UDim2.new(0, 5, 0, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = State.CurrentTheme.Text
-    label.Font = LayoutConfig.Font
-    label.TextSize = 12
-    label.Text = tostring(text)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.TextWrapped = true
-    label.Parent = notif
-    -- Animate in
-    TweenService:Create(notif, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30)}):Play()
-    -- Fade out and destroy
-    task.delay(duration or 2, function()
-        TweenService:Create(notif, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
-        task.wait(0.3)
-        notif:Destroy()
-    end)
+    -- Временно отключено или убрано, так как не используется в меню напрямую
+    -- if not NotificationFrame then return end
+    -- local settings = _G.BugFarmAPI.GetConfig()
+    -- if settings.ShowNotifications == false then return end
+    -- ... логика уведомления ...
+    print("[NOTIFICATION] " .. tostring(text)) -- Временный вывод в консоль
 end
 
 --// UI CREATION //--
@@ -304,7 +277,7 @@ MiniIcon.BackgroundTransparency = 1
 MiniIcon.Visible = true
 MiniIcon.Parent = ScreenGui
 
-CreateNotificationSystem()
+-- CreateNotificationSystem() -- Убран вызов создания уведомлений
 
 --// MENU DATA VALIDATION //--
 local function ValidateItem(item, tabName)
@@ -337,23 +310,15 @@ local MenuData = {
         Name = "Bug Farm",
         Items = {
             {Type = "Button", Name = "Enabled", State = false, Callback = function(state)
-                if state then
-                    _G.BugFarmAPI.ForceStart() -- Use API to start/enable
-                    ShowNotification("Bug Farm: ON", 1.5)
-                else
-                    _G.BugFarmAPI.Stop() -- Use API to stop/disable
-                    ShowNotification("Bug Farm: OFF", 1.5)
-                end
+                -- Только устанавливаем состояние, не запускаем цикл
+                _G.BugFarmAPI.SetConfig({Enabled = state})
+                ShowNotification("Enabled set to: " .. (state and "ON" or "OFF"), 1.5)
             end},
-            -- NEW: Pause Button
+            -- NEW: Pause Button (for display only, controlled by F2)
             {Type = "Button", Name = "Paused", State = false, Callback = function(state)
-                 if state then
-                     _G.BugFarmAPI.Pause() -- Use API to pause
-                     ShowNotification("Bug Farm: Paused", 1.5)
-                 else
-                     _G.BugFarmAPI.Resume() -- Use API to resume
-                     ShowNotification("Bug Farm: Resumed", 1.5)
-                 end
+                 -- This button now reflects the API state, controlled by F2
+                 -- Do nothing on click, just show status
+                 ShowNotification("Use F2 to Pause/Resume", 1.5)
              end},
              -- NEW: Pine Tree Distance Slider
              {Type = "Slider", Name = "Pine Tree Distance", Value = 20, Max = 50, Min = 5, Callback = function(value)
@@ -380,12 +345,14 @@ local MenuData = {
             {Type = "Button", Name = "Jump Dodge", State = true, Callback = function(state)
                 _G.BugFarmAPI.SetConfig({JumpDodgeEnabled = state}) -- Use API to update
             end},
-            {Type = "Button", Name = "Notifications", State = true, Callback = function(state)
-                _G.BugFarmAPI.SetConfig({ShowNotifications = state}) -- Use API to update
-            end},
+            -- Убрана кнопка Notifications
+            -- {Type = "Button", Name = "Notifications", State = true, Callback = function(state)
+            --     _G.BugFarmAPI.SetConfig({ShowNotifications = state}) -- Use API to update
+            -- end},
             {Type = "Action", Name = "Edit Blacklist", Action = "EditBlacklist"},
-            {Type = "Action", Name = "Force Start", Action = "ForceStartBugFarm"},
-            {Type = "Action", Name = "Stop Farm", Action = "StopBugFarm"}
+            -- Убраны кнопки Force Start и Stop Farm
+            -- {Type = "Action", Name = "Force Start", Action = "ForceStartBugFarm"},
+            -- {Type = "Action", Name = "Stop Farm", Action = "StopBugFarm"}
         }
     },
     {
@@ -815,6 +782,11 @@ local function UpdateVisuals()
             if item.Name == "Paused" and item.Type == "Button" then
                 local apiState = _G.BugFarmAPI.GetConfig().Paused
                 item.State = apiState -- Sync item state with API
+                text = (apiState and "[PAUSED] " or "[RUNNING] ") .. (item.Name or "")
+            elseif item.Name == "Enabled" and item.Type == "Button" then
+                -- Show state based on API
+                local apiState = _G.BugFarmAPI.GetConfig().Enabled
+                item.State = apiState
                 text = (apiState and "[x] " or "[ ] ") .. (item.Name or "")
             else
                 text = (item.State and "[x] " or "[ ] ") .. (item.Name or "")
@@ -1089,7 +1061,7 @@ end
 local function OnF1Activated(actionName, inputState, inputObject)
     if inputState == Enum.UserInputState.Begin then
         local currentConfig = _G.BugFarmAPI.GetConfig()
-        if currentConfig.Running then
+        if currentConfig.Running and currentConfig.Paused then
             _G.BugFarmAPI.Resume() -- F1 resumes if paused
             ShowNotification("Bug Farm: Resumed via F1", 1.5)
             -- Update the "Paused" button state in the menu
@@ -1100,17 +1072,20 @@ local function OnF1Activated(actionName, inputState, inputObject)
                 end
             end
             UpdateVisuals()
-        else
-            _G.BugFarmAPI.ForceStart() -- F1 starts if stopped
+        elseif not currentConfig.Running and currentConfig.Enabled then
+            _G.BugFarmAPI.ForceStart() -- F1 starts if not running but enabled
             ShowNotification("Bug Farm: Started via F1", 1.5)
-            -- Update the "Enabled" button state in the menu
+            -- Update the "Paused" button state in the menu (should be false at start)
             for _, item in ipairs(MenuData[1].Items) do
-                if item.Name == "Enabled" and item.Type == "Button" then
-                    item.State = true
+                if item.Name == "Paused" and item.Type == "Button" then
+                    item.State = false
                     break
                 end
             end
             UpdateVisuals()
+        else
+            -- If not running and not enabled, F1 does nothing specific
+            ShowNotification("Bug Farm: Not enabled or already running", 1.5)
         end
     end
 end
@@ -1162,11 +1137,6 @@ local function OnF3Activated(actionName, inputState, inputObject)
         UpdateVisuals()
     end
 end
-
--- Bind keys
-ContextActionService:BindAction("BugFarmF1", OnF1Activated, false, Enum.KeyCode.F1)
-ContextActionService:BindAction("BugFarmF2", OnF2Activated, false, Enum.KeyCode.F2)
-ContextActionService:BindAction("BugFarmF3", OnF3Activated, false, Enum.KeyCode.F3)
 
 --// INPUT HANDLING //--
 local function ToggleFade(visible)
@@ -1343,15 +1313,16 @@ local function TriggerSingleAction(key)
                         item.State = oldState
                     end
                 end
-                -- Special handling for "Paused" button callback
+                -- Special handling for "Paused" button callback - now just shows notification
                 if item.Name == "Paused" and item.Type == "Button" then
-                     if item.State then
-                         _G.BugFarmAPI.Pause() -- Use API to pause if menu says paused
-                         ShowNotification("Bug Farm: Paused", 1.5)
-                     else
-                         _G.BugFarmAPI.Resume() -- Use API to resume if menu says resumed
-                         ShowNotification("Bug Farm: Resumed", 1.5)
-                     end
+                     ShowNotification("Use F2 to control pause/resume", 1.5)
+                     -- Sync state back from API to ensure consistency
+                     local apiState = _G.BugFarmAPI.GetConfig().Paused
+                     item.State = apiState
+                 end
+                 -- Special handling for "Enabled" button callback - just updates API
+                 if item.Name == "Enabled" and item.Type == "Button" then
+                     _G.BugFarmAPI.SetConfig({Enabled = item.State})
                  end
                 if State.AutoSave and State.LastConfig ~= "" then
                     task.delay(0.3, function() SaveConfig(State.LastConfig) end)
@@ -1505,29 +1476,30 @@ local function TriggerSingleAction(key)
                     BlacklistFrame.Visible = true
                     BlacklistBox:CaptureFocus()
                     BlacklistBox.Text = table.concat(_G.BugFarmAPI.Blacklist, "\n") -- Use API's blacklist
-                elseif item.Action == "ForceStartBugFarm" then
-                    _G.BugFarmAPI.ForceStart() -- Use API to force start
-                    ShowNotification("Bug Farm Force Started", 2)
-                    -- Update the "Enabled" button state in the menu
-                    for _, item in ipairs(MenuData[1].Items) do
-                        if item.Name == "Enabled" and item.Type == "Button" then
-                            item.State = true
-                            break
-                        end
-                    end
-                    UpdateVisuals()
-                elseif item.Action == "StopBugFarm" then
-                    _G.BugFarmAPI.Stop() -- Use API to stop
-                    ShowNotification("Bug Farm Stopped", 2)
-                    -- Update the "Enabled" and "Paused" button states in the menu
-                    for _, item in ipairs(MenuData[1].Items) do
-                        if item.Name == "Enabled" and item.Type == "Button" then
-                            item.State = false
-                        elseif item.Name == "Paused" and item.Type == "Button" then
-                            item.State = false
-                        end
-                    end
-                    UpdateVisuals()
+                -- Убраны кнопки Force Start и Stop Farm
+                -- elseif item.Action == "ForceStartBugFarm" then
+                --     _G.BugFarmAPI.ForceStart() -- Use API to force start
+                --     ShowNotification("Bug Farm Force Started", 2)
+                --     -- Update the "Enabled" button state in the menu
+                --     for _, item in ipairs(MenuData[1].Items) do
+                --         if item.Name == "Enabled" and item.Type == "Button" then
+                --             item.State = true
+                --             break
+                --         end
+                --     end
+                --     UpdateVisuals()
+                -- elseif item.Action == "StopBugFarm" then
+                --     _G.BugFarmAPI.Stop() -- Use API to stop
+                --     ShowNotification("Bug Farm Stopped", 2)
+                --     -- Update the "Enabled" and "Paused" button states in the menu
+                --     for _, item in ipairs(MenuData[1].Items) do
+                --         if item.Name == "Enabled" and item.Type == "Button" then
+                --             item.State = false
+                --         elseif item.Name == "Paused" and item.Type == "Button" then
+                --             item.State = false
+                --         end
+                --     end
+                --     UpdateVisuals()
                 end
             elseif item.Type == "File" then
                 LoadConfig(item.Name or "")
@@ -1743,8 +1715,12 @@ end)
 table.insert(Connections, UIS_Ended)
 
 --// INITIALIZE //--
--- Wait for API to be available
+-- Wait for API to be available before binding keys
 repeat task.wait() until _G.BugFarmAPI
+-- Bind keys AFTER API is available
+ContextActionService:BindAction("BugFarmF1", OnF1Activated, false, Enum.KeyCode.F1)
+ContextActionService:BindAction("BugFarmF2", OnF2Activated, false, Enum.KeyCode.F2)
+ContextActionService:BindAction("BugFarmF3", OnF3Activated, false, Enum.KeyCode.F3)
 RefreshList()
 SetControls(true)
 UpdateVisuals()

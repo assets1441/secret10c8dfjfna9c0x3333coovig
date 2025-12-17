@@ -1,7 +1,3 @@
---- BugFarmCore_fixed.lua (原始)
-
-
-+++ BugFarmCore_fixed.lua (修改后)
 -- BugFarmCore.lua
 --// SERVICES //--
 local Players = game:GetService("Players")

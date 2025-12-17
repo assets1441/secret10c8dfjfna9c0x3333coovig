@@ -1,3 +1,7 @@
+--- BugFarmCore_fixed.lua (原始)
+
+
++++ BugFarmCore_fixed.lua (修改后)
 -- BugFarmCore.lua
 --// SERVICES //--
 local Players = game:GetService("Players")
@@ -462,7 +466,7 @@ function ForceStartBugFarm() -- F1 запускает через эту функ
 end
 
 --// API CREATION //--
-_G.BugFarmAPI = {
+local BugFarmAPI = {
     Start = StartBugFarm,
     Stop = StopBugFarm,
     Pause = PauseBugFarm,
@@ -487,5 +491,19 @@ _G.BugFarmAPI = {
     IsSpawnerReady = IsSpawnerReady,
     -- Add any other functions you might want the menu to call directly
 }
+
+-- Store the API in _G
+_G.BugFarmAPI = BugFarmAPI
+
+-- Also set up a backup mechanism to restore the API if it gets lost
+spawn(function()
+    while true do
+        task.wait(5) -- Check every 5 seconds
+        if not _G.BugFarmAPI then
+            _G.BugFarmAPI = BugFarmAPI
+            print("[BugFarmCore] API restored after loss")
+        end
+    end
+end)
 
 print("[BugFarmCore] Loaded. API available at _G.BugFarmAPI")

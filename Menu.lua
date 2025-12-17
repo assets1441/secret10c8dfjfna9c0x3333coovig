@@ -1,4 +1,4 @@
--- BugFarmMenu.lua (Обновленный для использования с main.lua)
+-- BugFarmMenu.lua (Обновленный для ожидания полного API перед привязкой клавиш)
 --// SERVICES //--
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -339,14 +339,7 @@ local MenuData = {
             {Type = "Button", Name = "Jump Dodge", State = true, Callback = function(state)
                 _G.BugFarmAPI.SetConfig({JumpDodgeEnabled = state}) -- Use API to update
             end},
-            -- Убрана кнопка Notifications
-            -- {Type = "Button", Name = "Notifications", State = true, Callback = function(state)
-            --     _G.BugFarmAPI.SetConfig({ShowNotifications = state}) -- Use API to update
-            -- end},
             {Type = "Action", Name = "Edit Blacklist", Action = "EditBlacklist"},
-            -- Убраны кнопки Force Start и Stop Farm
-            -- {Type = "Action", Name = "Force Start", Action = "ForceStartBugFarm"},
-            -- {Type = "Action", Name = "Stop Farm", Action = "StopBugFarm"}
         }
     },
     {
@@ -1412,30 +1405,6 @@ local function TriggerSingleAction(key)
                     BlacklistFrame.Visible = true
                     BlacklistBox:CaptureFocus()
                     BlacklistBox.Text = table.concat(_G.BugFarmAPI.Blacklist, "\n") -- Use API's blacklist
-                -- Убраны кнопки Force Start и Stop Farm
-                -- elseif item.Action == "ForceStartBugFarm" then
-                --     _G.BugFarmAPI.ForceStart() -- Use API to force start
-                --     ShowNotification("Bug Farm Force Started", 2)
-                --     -- Update the "Enabled" button state in the menu
-                --     for _, item in ipairs(MenuData[1].Items) do
-                --         if item.Name == "Enabled" and item.Type == "Button" then
-                --             item.State = true
-                --             break
-                --         end
-                --     end
-                --     UpdateVisuals()
-                -- elseif item.Action == "StopBugFarm" then
-                --     _G.BugFarmAPI.Stop() -- Use API to stop
-                --     ShowNotification("Bug Farm Stopped", 2)
-                --     -- Update the "Enabled" and "Paused" button states in the menu
-                --     for _, item in ipairs(MenuData[1].Items) do
-                --         if item.Name == "Enabled" and item.Type == "Button" then
-                --             item.State = false
-                --         elseif item.Name == "Paused" and item.Type == "Button" then
-                --             item.State = false
-                --         end
-                --     end
-                --     UpdateVisuals()
                 end
             elseif item.Type == "File" then
                 LoadConfig(item.Name or "")
@@ -1651,7 +1620,8 @@ end)
 table.insert(Connections, UIS_Ended)
 
 --// INITIALIZE //--
--- Wait for API to be available (This check happens implicitly because main.lua waits)
+-- ЖДЕМ API ПЕРЕД ТЕМ, КАК ПРОДОЛЖАТЬ!
+repeat task.wait() until _G.BugFarmAPI
 -- Bind keys AFTER API is available and known to exist
 ContextActionService:BindAction("BugFarmF1", OnF1Activated, false, Enum.KeyCode.F1)
 ContextActionService:BindAction("BugFarmF2", OnF2Activated, false, Enum.KeyCode.F2)

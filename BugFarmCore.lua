@@ -471,7 +471,7 @@ print("[BugFarmCore] Модуль загружен. Возвращаем гот�
 
 -- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Возвращаем полностью готовую таблицу API.
 return BugFarmAPI
-
+end
 -- Also set up a backup mechanism to restore the API if it gets lost
 spawn(function()
     while true do
@@ -484,3 +484,4 @@ spawn(function()
 end)
 
 print("[BugFarmCore] Loaded. API available at _G.BugFarmAPI")
+
